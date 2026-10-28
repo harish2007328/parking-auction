@@ -2,49 +2,49 @@
 // Tailored exclusively for Tirunelveli Town, Junction, Vannarpettai, Palayamkottai & Malls
 // Every spot supports BOTH Live Auction Bidding AND Dynamic Reverse Price Decay!
 
-export const TIRUNELVELI_CENTER = [8.7250, 77.7050];
+export const TIRUNELVELI_CENTER = [8.7250, 77.7120];
 
 export const TIRUNELVELI_LOCALITIES = {
   'all': {
     name: 'All Tirunelveli Spots',
-    center: [8.7250, 77.7050],
+    center: [8.7240, 77.7180],
     zoom: 14,
     userLocation: [8.7240, 77.7250],
     description: 'All commercial and private slots across Tirunelveli'
   },
   'vannarpettai': {
     name: 'Vannarpettai & Roopa Mall',
-    center: [8.7235, 77.7280],
+    center: [8.7242, 77.7275],
     zoom: 16,
-    userLocation: [8.7240, 77.7250],
+    userLocation: [8.7230, 77.7255],
     description: 'Shopping hubs, textile showrooms, and Roopa Mall'
   },
   'town': {
     name: 'Tirunelveli Town (Nellaiappar Temple)',
-    center: [8.7285, 77.6870],
+    center: [8.7289, 77.6897],
     zoom: 16,
-    userLocation: [8.7270, 77.6860],
+    userLocation: [8.7280, 77.6865],
     description: 'High traffic temple zone, Car Streets, Bazaar'
   },
   'junction': {
     name: 'Tirunelveli Junction (Railway Station)',
-    center: [8.7300, 77.7120],
+    center: [8.7303, 77.7126],
     zoom: 16,
-    userLocation: [8.7290, 77.7110],
+    userLocation: [8.7295, 77.7110],
     description: 'Railway station, bus stands, and commercial hotels'
   },
   'palayamkottai': {
     name: 'Palayamkottai (Market & VOC Ground)',
-    center: [8.7120, 77.7420],
-    zoom: 15,
-    userLocation: [8.7110, 77.7400],
+    center: [8.7150, 77.7390],
+    zoom: 15.5,
+    userLocation: [8.7130, 77.7370],
     description: 'Twin city district, schools, colleges, and VOC stadium'
   },
   'new-bus-stand': {
     name: 'New Bus Stand (Vaeinthaankulam)',
-    center: [8.6985, 77.7330],
+    center: [8.7065, 77.7445],
     zoom: 16,
-    userLocation: [8.6990, 77.7310],
+    userLocation: [8.7055, 77.7430],
     description: 'Intercity bus terminal and bypass shopping complex'
   }
 };
@@ -57,8 +57,8 @@ export const INITIAL_SPOTS = [
     title: 'Roopa Mall & North Bypass Reserved Bay 2B',
     address: 'North Bypass Road, Vannarpettai, Tirunelveli',
     landmark: 'Adjacent to Roopa Mall Entry Gate 2',
-    lat: 8.7248,
-    lng: 77.7265,
+    lat: 8.7252,
+    lng: 77.7270,
     spotType: 'Indoor Garage',
     pricingType: 'auction',
     basePrice: 50,
