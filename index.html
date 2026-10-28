@@ -2120,13 +2120,7 @@ html, body {
     </div>
   </div>
 
-  <!-- Self-contained production bundle (Executes cleanly with zero strict MIME constraints on Vercel) -->
+  <!-- Self-contained production bundle (zero MIME restrictions, works everywhere) -->
   <script src="./app.bundle.js"></script>
-  <!-- Fallback to native ES modules if bundle is absent -->
-  <script type="module">
-    if (!window.__PARKPULSE_INITIALIZED__) {
-      import('./js/app.js');
-    }
-  </script>
 </body>
 </html>
