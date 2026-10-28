@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ParkPulse • Tirunelveli Smart Parking & Auction Discovery</title>
+  <meta name="description" content="Find the nearest available parking space in Tirunelveli Town, Junction, Vannarpettai & Roopa Mall. Real-time dynamic price decay and live auctions with instant booking." />
+
+  <!-- Instrument Sans & JetBrains Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <!-- App Styles (White Theme, Solid & Pastel Colors, No Gradients, No Drop Shadows) -->
+  <link rel="stylesheet" href="./styles.css" />
+
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Real PayPal Sandbox JavaScript SDK with Provided Client ID -->
+  <script src="https://www.paypal.com/sdk/js?client-id=AX7P1Zwh2dJgyNqshuwXV6qTK4DomttT81KbdSjYyO3fzFQ9zMlxUkZyH55qkCCfeKDkLH1fRk9_CfC4&currency=USD&components=buttons"></script>
+
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Clean White Navigation Bar -->
+    <header class="main-navbar">
+      <div class="nav-left">
+        <div class="brand-logo" id="brandLogo">
+          <div class="brand-icon-box">🅿️</div>
+          <div class="brand-text">
+            <span class="brand-name">ParkPulse</span>
+            <span class="brand-tagline">Tirunelveli Smart Parking</span>
+          </div>
+        </div>
+
+        <!-- Locality Selector Dropdown -->
+        <div class="locality-picker-box">
+          <select id="localitySelector" class="locality-select" aria-label="Select Tirunelveli Locality">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Center Live Cloud DB & PayPal Status Pill -->
+      <div class="nav-center">
+        <div class="live-alert-pill" style="background:var(--pastel-mint-bg); border-color:var(--pastel-mint-border); color:var(--pastel-mint-text);">
+          <span class="pulse-dot" style="background:var(--solid-green);"></span>
+          <span><strong>Live Cloud Sync:</strong> Supabase DB & PayPal Sandbox Active</span>
+        </div>
+      </div>
+
+      <!-- Right Actions -->
+      <div class="nav-right">
+        <!-- Sound Toggle -->
+        <button id="btnAudioToggle" class="nav-action-btn" title="Toggle Sound">
+          <span class="icon">🔊</span>
+          <span>Sound On</span>
+        </button>
+
+        <!-- Driver vs Host Mode Switcher -->
+        <div class="mode-switch-group">
+          <button id="modeDriver" class="mode-tab-btn is-active">
+            🚗 Driver
+          </button>
+          <button id="modeHost" class="mode-tab-btn">
+            🅿️ Space Owner
+          </button>
+        </div>
+
+        <!-- My Bookings -->
+        <button id="btnMyBookings" class="nav-action-btn">
+          🎫 Gate Pass
+        </button>
+
+        <!-- List Space CTA -->
+        <button id="btnOpenHostModal" class="btn-solid-primary">
+          + List Space
+        </button>
+      </div>
+    </header>
+
+    <!-- DRIVER DISCOVERY VIEW -->
+    <main id="driverDiscoveryView" class="discovery-layout">
+      <!-- Left Sidebar: Feed & Filters -->
+      <aside id="discoverySidebar" class="discovery-sidebar">
+        <div class="sidebar-header">
+          <!-- Search Row -->
+          <div class="search-box-row">
+            <div class="search-input-wrap">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="spotSearchInput" placeholder="Search Nellaiappar, Roopa Mall, Junction..." />
+            </div>
+            <button id="btnLocateMe" class="locate-gps-btn" title="Center on GPS">
+              <span>📍 GPS</span>
+            </button>
+          </div>
+
+          <!-- Filter Chips -->
+          <div class="filter-chips-scroll">
+            <button class="filter-chip is-active" data-filter="all">All Tirunelveli</button>
+            <button class="filter-chip" data-filter="decay">🔥 Dynamic Drops</button>
+            <button class="filter-chip" data-filter="auction">🔨 Live Auctions (<span id="statAuctionsCount">2</span>)</button>
+          </div>
+
+          <!-- Sub-toggles -->
+          <div class="filter-sub-toggles">
+            <label class="toggle-label">
+              <input type="checkbox" id="filterEv" />
+              <span>⚡ EV Charging</span>
+            </label>
+            <label class="toggle-label">
+              <input type="checkbox" id="filterCovered" />
+              <span>☂️ Covered / Shelter</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Spots Feed List -->
+        <div id="spotsFeedList" class="sidebar-feed-container">
+          <!-- Populated via JS -->
+        </div>
+      </aside>
+
+      <!-- Center-Right: Interactive Map Canvas -->
+      <section class="map-canvas-wrap">
+        <div id="map"></div>
+
+        <!-- Selected Spot Detail Drawer (White Theme Flat Panel) -->
+        <div id="spotDetailDrawer" class="spot-detail-drawer">
+          <div class="detail-drawer-header">
+            <img id="detailSpotPhoto" src="" alt="Spot Photo" class="detail-spot-photo" />
+            <button id="btnCloseDetail" class="detail-close-btn" title="Close Panel">✕</button>
+            <span id="detailSpotType" class="detail-spot-type-badge">Private Driveway</span>
+          </div>
+
+          <div class="detail-drawer-body">
+            <div>
+              <h3 id="detailSpotTitle" class="detail-title">Nellaiappar Temple West Car St Driveway</h3>
+              <p id="detailSpotAddress" class="detail-address">📍 West Car St, Tirunelveli Town</p>
+            </div>
+
+            <!-- Mode Switcher Tabs: Auction Bidding vs Reverse Price Decay -->
+            <div class="pricing-mode-tabs" style="display:flex; gap:8px; margin-bottom:12px;">
+              <button id="btnTabAuction" class="pricing-tab-btn" style="flex:1; padding:8px 10px; background:var(--pastel-amber-bg); border:1.5px solid var(--solid-amber); color:var(--solid-amber); border-radius:4px; font-weight:800; font-size:0.8rem; cursor:pointer; font-family:var(--font-family);">
+                🔨 Live Bidding Auction
+              </button>
+              <button id="btnTabDecay" class="pricing-tab-btn" style="flex:1; padding:8px 10px; background:#ffffff; border:1px solid var(--border-light); color:var(--text-sub); border-radius:4px; font-weight:700; font-size:0.8rem; cursor:pointer; font-family:var(--font-family);">
+                🔥 Reverse Price Decay
+              </button>
+            </div>
+
+            <!-- Reverse Price Decay Card (Pastel Mint) -->
+            <div id="detailDecaySection" class="pricing-widget-card">
+              <div class="widget-header-row">
+                <span class="widget-label">
+                  Dynamic Reverse Price Decay
+                </span>
+                <span id="detailWindowTimer" class="badge-timer-pastel">18 minutes left</span>
+              </div>
+
+              <div class="decay-price-display">
+                <span id="detailCurrentPrice" class="decay-current-price">₹35</span>
+                <span id="detailBasePrice" class="decay-original-price">₹60</span>
+                <span id="detailDiscountBadge" class="decay-savings-pill">Save 42%</span>
+              </div>
+
+              <div class="decay-track">
+                <div id="detailDecayFill" class="decay-fill" style="width: 50%;"></div>
+              </div>
+
+              <div class="decay-limits-row">
+                <span>Floor Reserve: <strong id="detailFloorPrice">₹25</strong></span>
+                <span>Base Rate: ₹60</span>
+              </div>
+
+              <p id="detailDecayRateNote" class="decay-note">
+                Price drops by ₹1.5 every 2 minutes as window approaches expiry!
+              </p>
+            </div>
+
+            <!-- High-Demand Micro-Auction Card (Pastel Amber) -->
+            <div id="detailAuctionSection" class="pricing-widget-card auction" style="display: none;">
+              <div class="widget-header-row">
+                <span class="widget-label auction">
+                  🔨 Live Micro-Auction
+                </span>
+                <span id="detailAuctionTimer" class="badge-urgent-pastel">02:44</span>
+              </div>
+
+              <div class="auction-metrics-grid">
+                <div class="auction-metric-box">
+                  <div class="label">Current Leading Bid</div>
+                  <div id="detailCurrentBid" class="value">₹75</div>
+                </div>
+                <div class="auction-metric-box">
+                  <div class="label">Instant Buy Now</div>
+                  <div id="detailInstantBuyPrice" class="value" style="color:var(--solid-primary);">₹120</div>
+                </div>
+              </div>
+
+              <div class="auction-bidder-info">
+                <span>Leading: <strong id="detailHighestBidder">Murugan_TN72</strong></span>
+                <span>Quick Increments:</span>
+              </div>
+
+              <!-- Quick Bid Step Chips -->
+              <div class="bidding-quick-steps">
+                <button class="btn-bid-step" data-step="10">+₹10</button>
+                <button class="btn-bid-step" data-step="20">+₹20</button>
+                <button class="btn-bid-step" data-step="50">+₹50</button>
+              </div>
+
+              <!-- Custom Bid Amount Input & Action -->
+              <div style="display:flex; gap:6px; margin-bottom:8px;">
+                <input type="number" id="bidCustomAmount" class="form-control" style="flex:1; font-weight:800; font-family:var(--font-mono);" step="5" min="10" />
+                <button id="btnDetailPlaceBid" class="btn-place-bid-primary" style="flex:1.5;">
+                  Place My Bid 🔨
+                </button>
+              </div>
+
+              <button id="btnDetailInstantBuy" class="btn-instant-buy-primary" style="width:100%;">
+                ⚡ Buy Now & Claim Instantly
+              </button>
+
+              <!-- Live Bid History Ledger -->
+              <div style="margin-top:10px;">
+                <span style="font-size:0.7rem; font-weight:700; color:var(--text-sub); text-transform:uppercase;">Recent Bids</span>
+                <div id="bidHistoryContainer" class="bid-history-ledger">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Distance ETA -->
+            <div class="detail-specs-grid">
+              <div class="spec-box">
+                <div class="spec-title">Walking Distance</div>
+                <div id="detailDistanceEta" class="spec-value">3 min walk • 180m away</div>
+              </div>
+              <div class="spec-box">
+                <div class="spec-title">Vehicle Fit</div>
+                <div id="detailVehicleSize" class="spec-value">Sedan / SUV / Auto</div>
+              </div>
+            </div>
+
+            <!-- Host Card -->
+            <div class="detail-host-card">
+              <div class="detail-host-profile">
+                <img id="detailHostAvatar" src="" class="detail-host-avatar" alt="Host" />
+                <div>
+                  <div id="detailHostName" class="detail-host-name">Subramanian Pillai</div>
+                  <div id="detailHostRating" class="detail-host-sub">★ 4.96 (142 reviews)</div>
+                </div>
+              </div>
+              <span id="detailHostBadge" class="detail-host-badge">Temple Superhost</span>
+            </div>
+
+            <!-- Overview -->
+            <div>
+              <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Spot Details</div>
+              <p id="detailSpotDescription" style="font-size:0.82rem; color:var(--text-sub); line-height:1.4;"></p>
+            </div>
+
+            <!-- Features -->
+            <div>
+              <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Features</div>
+              <div id="detailAmenitiesList" class="amenities-flex"></div>
+            </div>
+
+            <!-- Access Instructions -->
+            <div>
+              <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Arrival Instructions</div>
+              <p id="detailAccessInstructions" style="font-size:0.8rem; color:var(--text-sub); line-height:1.4; background:var(--bg-subtle); padding:8px 10px; border-radius:4px; border:1px solid var(--border-light);"></p>
+            </div>
+          </div>
+
+          <!-- Drawer Action Footer with PayPal Reserve Button -->
+          <div class="detail-drawer-footer">
+            <button id="btnDetailReservePaypal" class="btn-paypal-reserve">
+              Reserve with PayPal Sandbox • <span id="detailBtnPrice">₹35</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Mobile Bottom Tab Bar (Map vs Spots) -->
+    <div class="mobile-view-toggle">
+      <button id="mobileTabMap" class="mobile-tab-btn is-active">🗺️ Map View</button>
+      <button id="mobileTabList" class="mobile-tab-btn">📋 Spots List</button>
+    </div>
+
+    <!-- HOST / OWNER DASHBOARD VIEW -->
+    <main id="hostDashboardView" class="host-dashboard-view" style="display: none;">
+      <div class="host-hero-banner">
+        <div>
+          <h2>Earn Money From Empty Parking in Tirunelveli</h2>
+          <p>
+            Have an unused driveway or garage near Nellaiappar Temple, Junction, or Roopa Mall? Dynamic Reverse Pricing automatically lowers rates as your availability window nears end, guaranteeing 90%+ occupancy.
+          </p>
+        </div>
+        <button class="btn-solid-primary" onclick="document.getElementById('hostModal').classList.add('is-active')">
+          + List Your Space
+        </button>
+      </div>
+
+      <div id="hostAnalyticsContainer"></div>
+    </main>
+
+    <!-- PAYPAL CHECKOUT MODAL -->
+    <div id="paypalModal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="paypal-brand-banner">
+            <strong style="color:var(--paypal-solid-blue); font-size:1.1rem; font-weight:800;">PayPal Sandbox</strong>
+            <span class="paypal-secure-badge">🔒 Official SDK Sandbox Checkout</span>
+          </div>
+          <button class="modal-close-icon" data-close-modal>✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div id="paypalOrderDetails"></div>
+
+          <!-- Real PayPal JavaScript SDK Buttons Container -->
+          <div id="paypalButtonContainer" style="width:100%; min-height:48px;">
+            <!-- Rendered by window.paypal.Buttons -->
+          </div>
+
+          <!-- Direct Fallback / Card Option -->
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:4px;">
+            <button id="btnPaypalUpi" class="btn-upi-card">
+              <span>💳 Test Card / Instant UPI Simulation</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Processing Overlay -->
+        <div id="paypalProcessingOverlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.95); flex-direction:column; align-items:center; justify-content:center; gap:12px; z-index:20;">
+          <div style="width:36px; height:36px; border:3px solid #e2e8f0; border-top-color:#0284c7; border-radius:50%; animation:spin 0.8s linear infinite;"></div>
+          <div id="paypalProcessingStatus" style="font-weight:700; font-size:0.9rem;">Authorizing PayPal Gateway...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIGITAL GATE TICKET PASS MODAL -->
+    <div id="digitalPassModal" class="modal-overlay">
+      <div class="modal-card" style="width: 440px;">
+        <div class="modal-header">
+          <h3 class="modal-title">Verified Gate Entry Pass</h3>
+          <button class="modal-close-icon" data-close-modal>✕</button>
+        </div>
+        <div class="modal-body" id="digitalPassContent">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- HOST LIST A SPACE MODAL -->
+    <div id="hostModal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">List an Unused Space in Tirunelveli</h3>
+          <button class="modal-close-icon" data-close-modal>✕</button>
+        </div>
+        <form id="newSpotForm" class="modal-body">
+          <div class="form-group">
+            <label for="spotTitle">Space Title</label>
+            <input type="text" id="spotTitle" class="form-control" placeholder="e.g. West Car Street Heritage Driveway" required />
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="spotLocality">Tirunelveli Locality</label>
+              <select id="spotLocality" class="form-control">
+                <option value="town">Tirunelveli Town (Nellaiappar Temple)</option>
+                <option value="junction">Tirunelveli Junction (Station)</option>
+                <option value="vannarpettai">Vannarpettai & Roopa Mall</option>
+                <option value="palayamkottai">Palayamkottai (VOC Ground)</option>
+                <option value="new-bus-stand">New Bus Stand (Vaeinthaankulam)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="spotType">Space Type</label>
+              <select id="spotType" class="form-control">
+                <option value="Private Driveway">Private Driveway</option>
+                <option value="Indoor Garage">Indoor Garage</option>
+                <option value="Residential Carport">Residential Carport</option>
+                <option value="Commercial Lot">Commercial Lot</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="spotAddress">Street Address / Landmark</label>
+            <input type="text" id="spotAddress" class="form-control" placeholder="e.g. 14 North Car Street, Near Arch" required />
+          </div>
+
+          <!-- Strategy Selection -->
+          <div class="form-group">
+            <label>Dynamic Pricing Strategy</label>
+            <div class="form-grid-2">
+              <label class="strategy-radio-label">
+                <input type="radio" name="pricingStrategy" value="decay" checked />
+                <strong style="font-size:0.82rem;">🔥 Reverse Price Decay</strong>
+                <span style="font-size:0.7rem; color:var(--text-sub); margin-top:2px;">Price drops as deadline approaches to guarantee full occupancy.</span>
+              </label>
+
+              <label class="strategy-radio-label">
+                <input type="radio" name="pricingStrategy" value="auction" />
+                <strong style="font-size:0.82rem;">🔨 Micro-Auction</strong>
+                <span style="font-size:0.7rem; color:var(--text-sub); margin-top:2px;">Drivers place live bids in a 5-minute bidding war near temple/malls.</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="basePrice">Base Price (₹/hour)</label>
+              <input type="number" id="basePrice" class="form-control" value="50" step="5" min="20" required />
+            </div>
+            <div class="form-group" id="decayFields">
+              <label for="floorPrice">Floor Reserve (₹)</label>
+              <input type="number" id="floorPrice" class="form-control" value="25" step="5" min="15" />
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="windowMinutes">Availability Window (Minutes)</label>
+              <input type="number" id="windowMinutes" class="form-control" value="45" min="15" max="240" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Amenities</label>
+            <div class="amenities-flex">
+              <label class="toggle-label"><input type="checkbox" id="amenityEv" /> ⚡ EV Fast Charger</label>
+              <label class="toggle-label"><input type="checkbox" id="amenityCovered" checked /> ☂️ Covered</label>
+              <label class="toggle-label"><input type="checkbox" id="amenityCctv" checked /> 📹 CCTV Monitored</label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-solid-primary" style="height:42px; margin-top:6px;">
+            Publish Space in Tirunelveli 🚀
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main ES Module -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
