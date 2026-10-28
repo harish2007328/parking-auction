@@ -57,8 +57,8 @@ class PricingEngine {
   }
 
   getSpots(locality = 'all') {
-    if (!locality || locality === 'all') return this.spots;
-    return this.spots.filter(s => s.locality === locality);
+    let list = (!locality || locality === 'all') ? [...this.spots] : this.spots.filter(s => s.locality === locality);
+    return list.sort((a, b) => (a.distanceMeters || 9999) - (b.distanceMeters || 9999));
   }
 
   getSpotById(id) {

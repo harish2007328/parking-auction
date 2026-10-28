@@ -243,6 +243,14 @@ class App {
       });
     }
 
+    // Detail Drawer Close Button (✕)
+    const btnDetailClose = document.getElementById('btnDetailClose');
+    if (btnDetailClose) {
+      btnDetailClose.addEventListener('click', () => {
+        this.closeDetailDrawer();
+      });
+    }
+
     // Quick Step Bidding Buttons (+₹10, +₹20, +₹50)
     document.querySelectorAll('.btn-bid-step').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -540,13 +548,29 @@ class App {
     document.querySelectorAll('.spot-feed-card').forEach(c => {
       if (c.dataset.spotId === spot.id) {
         c.classList.add('is-selected');
-        c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Only scroll the sidebar feed container if card is not already visible
+        const container = document.getElementById('spotsFeedList');
+        if (container) {
+          const cRect = c.getBoundingClientRect();
+          const pRect = container.getBoundingClientRect();
+          if (cRect.top < pRect.top || cRect.bottom > pRect.bottom) {
+            c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }
       } else {
         c.classList.remove('is-selected');
       }
     });
 
     sound.playTick();
+  }
+
+  closeDetailDrawer() {
+    const drawer = document.getElementById('spotDetailDrawer');
+    if (drawer) drawer.classList.remove('is-open');
+    if (this.mapCtrl) this.mapCtrl.clearSelection();
+    this.selectedSpot = null;
+    document.querySelectorAll('.spot-feed-card').forEach(c => c.classList.remove('is-selected'));
   }
 
   handleSpotSelected(spot) {
@@ -750,6 +774,15 @@ class App {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  window.parkPulseApp = new App();
-});
+function initParkPulseApp() {
+  if (!window.parkPulseApp) {
+    window.parkPulseApp = new App();
+    window.__PARKPULSE_INITIALIZED__ = true;
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initParkPulseApp);
+} else {
+  initParkPulseApp();
+}

@@ -2,7 +2,7 @@
   "cleanUrls": true,
   "headers": [
     {
-      "source": "/js/(.*)",
+      "source": "/(.*).js",
       "headers": [
         {
           "key": "Content-Type",
@@ -15,7 +15,7 @@
       ]
     },
     {
-      "source": "/styles.css",
+      "source": "/(.*).css",
       "headers": [
         {
           "key": "Content-Type",
