@@ -1,6 +1,4 @@
 {
-  "version": 2,
-  "public": true,
   "cleanUrls": true,
   "headers": [
     {
@@ -28,26 +26,6 @@
           "value": "public, max-age=0, must-revalidate"
         }
       ]
-    }
-  ],
-  "routes": [
-    {
-      "src": "/js/(.*)",
-      "headers": {
-        "content-type": "application/javascript; charset=utf-8"
-      },
-      "dest": "/js/$1"
-    },
-    {
-      "src": "/styles.css",
-      "headers": {
-        "content-type": "text/css; charset=utf-8"
-      },
-      "dest": "/styles.css"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
     }
   ]
 }
