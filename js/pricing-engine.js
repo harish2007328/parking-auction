@@ -11,7 +11,7 @@ class PricingEngine {
   }
 
   loadSpots() {
-    const saved = localStorage.getItem('parkpulse_tvl_spots');
+    const saved = localStorage.getItem('parkpulse_tvl_spots_v2');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -24,7 +24,7 @@ class PricingEngine {
   }
 
   saveSpots() {
-    localStorage.setItem('parkpulse_tvl_spots', JSON.stringify(this.spots));
+    localStorage.setItem('parkpulse_tvl_spots_v2', JSON.stringify(this.spots));
   }
 
   resetSpots() {

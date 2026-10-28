@@ -147,54 +147,25 @@
 
           <div class="detail-drawer-body">
             <div>
-              <h3 id="detailSpotTitle" class="detail-title">Nellaiappar Temple West Car St Driveway</h3>
-              <p id="detailSpotAddress" class="detail-address">📍 West Car St, Tirunelveli Town</p>
+              <h3 id="detailSpotTitle" class="detail-title">Roopa Mall & North Bypass Reserved Bay 2B</h3>
+              <p id="detailSpotAddress" class="detail-address">📍 North Bypass Road, Vannarpettai</p>
             </div>
 
-            <!-- Mode Switcher Tabs: Auction Bidding vs Reverse Price Decay -->
-            <div class="pricing-mode-tabs" style="display:flex; gap:8px; margin-bottom:12px;">
-              <button id="btnTabAuction" class="pricing-tab-btn" style="flex:1; padding:8px 10px; background:var(--pastel-amber-bg); border:1.5px solid var(--solid-amber); color:var(--solid-amber); border-radius:4px; font-weight:800; font-size:0.8rem; cursor:pointer; font-family:var(--font-family);">
+            <!-- Mode Switcher: Live Micro-Auction Bidding vs Dynamic Price Decay -->
+            <div class="pricing-mode-tabs" style="display:flex; gap:8px; margin-top:4px; margin-bottom:10px;">
+              <button id="btnTabAuction" class="pricing-tab-btn" style="flex:1; padding:8px 10px; border-radius:6px; font-weight:800; font-size:0.82rem; cursor:pointer; background:var(--pastel-amber-bg); border:1.5px solid var(--solid-amber); color:var(--solid-amber);">
                 🔨 Live Bidding Auction
               </button>
-              <button id="btnTabDecay" class="pricing-tab-btn" style="flex:1; padding:8px 10px; background:#ffffff; border:1px solid var(--border-light); color:var(--text-sub); border-radius:4px; font-weight:700; font-size:0.8rem; cursor:pointer; font-family:var(--font-family);">
-                🔥 Reverse Price Decay
+              <button id="btnTabDecay" class="pricing-tab-btn" style="flex:1; padding:8px 10px; border-radius:6px; font-weight:800; font-size:0.82rem; cursor:pointer; background:#ffffff; border:1px solid var(--border-light); color:var(--text-sub);">
+                🔥 Dynamic Price Drop
               </button>
             </div>
 
-            <!-- Reverse Price Decay Card (Pastel Mint) -->
-            <div id="detailDecaySection" class="pricing-widget-card">
-              <div class="widget-header-row">
-                <span class="widget-label">
-                  Dynamic Reverse Price Decay
-                </span>
-                <span id="detailWindowTimer" class="badge-timer-pastel">18 minutes left</span>
-              </div>
-
-              <div class="decay-price-display">
-                <span id="detailCurrentPrice" class="decay-current-price">₹35</span>
-                <span id="detailBasePrice" class="decay-original-price">₹60</span>
-                <span id="detailDiscountBadge" class="decay-savings-pill">Save 42%</span>
-              </div>
-
-              <div class="decay-track">
-                <div id="detailDecayFill" class="decay-fill" style="width: 50%;"></div>
-              </div>
-
-              <div class="decay-limits-row">
-                <span>Floor Reserve: <strong id="detailFloorPrice">₹25</strong></span>
-                <span>Base Rate: ₹60</span>
-              </div>
-
-              <p id="detailDecayRateNote" class="decay-note">
-                Price drops by ₹1.5 every 2 minutes as window approaches expiry!
-              </p>
-            </div>
-
-            <!-- High-Demand Micro-Auction Card (Pastel Amber) -->
-            <div id="detailAuctionSection" class="pricing-widget-card auction" style="display: none;">
+            <!-- High-Demand Micro-Auction Card (Pastel Amber - DISPLAYED BY DEFAULT) -->
+            <div id="detailAuctionSection" class="pricing-widget-card auction" style="display: block;">
               <div class="widget-header-row">
                 <span class="widget-label auction">
-                  🔨 Live Micro-Auction
+                  🔨 Live Micro-Auction Bidding
                 </span>
                 <span id="detailAuctionTimer" class="badge-urgent-pastel">02:44</span>
               </div>
@@ -224,7 +195,7 @@
 
               <!-- Custom Bid Amount Input & Action -->
               <div style="display:flex; gap:6px; margin-bottom:8px;">
-                <input type="number" id="bidCustomAmount" class="form-control" style="flex:1; font-weight:800; font-family:var(--font-mono);" step="5" min="10" />
+                <input type="number" id="bidCustomAmount" class="form-control" style="flex:1; font-weight:800; font-family:var(--font-mono);" step="5" min="10" value="85" />
                 <button id="btnDetailPlaceBid" class="btn-place-bid-primary" style="flex:1.5;">
                   Place My Bid 🔨
                 </button>
@@ -236,11 +207,40 @@
 
               <!-- Live Bid History Ledger -->
               <div style="margin-top:10px;">
-                <span style="font-size:0.7rem; font-weight:700; color:var(--text-sub); text-transform:uppercase;">Recent Bids</span>
+                <span style="font-size:0.7rem; font-weight:700; color:var(--text-sub); text-transform:uppercase;">Recent Live Bids</span>
                 <div id="bidHistoryContainer" class="bid-history-ledger">
                   <!-- Rendered via JS -->
                 </div>
               </div>
+            </div>
+
+            <!-- Reverse Price Decay Card (Pastel Mint) -->
+            <div id="detailDecaySection" class="pricing-widget-card" style="display: none;">
+              <div class="widget-header-row">
+                <span class="widget-label">
+                  Dynamic Reverse Price Decay
+                </span>
+                <span id="detailWindowTimer" class="badge-timer-pastel">18 minutes left</span>
+              </div>
+
+              <div class="decay-price-display">
+                <span id="detailCurrentPrice" class="decay-current-price">₹35</span>
+                <span id="detailBasePrice" class="decay-original-price">₹60</span>
+                <span id="detailDiscountBadge" class="decay-savings-pill">Save 42%</span>
+              </div>
+
+              <div class="decay-track">
+                <div id="detailDecayFill" class="decay-fill" style="width: 50%;"></div>
+              </div>
+
+              <div class="decay-limits-row">
+                <span>Floor Reserve: <strong id="detailFloorPrice">₹25</strong></span>
+                <span>Base Rate: ₹60</span>
+              </div>
+
+              <p id="detailDecayRateNote" class="decay-note">
+                Price drops by ₹1.5 every 2 minutes as window approaches expiry!
+              </p>
             </div>
 
             <!-- Distance ETA -->

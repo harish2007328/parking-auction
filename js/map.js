@@ -142,7 +142,7 @@ export class MapController {
         });
 
         const marker = L.marker([spot.lat, spot.lng], { icon });
-        marker.on('click', () => this.selectSpot(spot));
+        marker.on('click', () => this.selectSpot(spot, true, true));
         marker.addTo(this.map);
         this.spotMarkers.set(spot.id, marker);
       }
@@ -188,7 +188,10 @@ export class MapController {
     `;
   }
 
-  selectSpot(spot, panTo = true) {
+  selectSpot(spot, panTo = true, triggerCallback = false) {
+    if (!spot) return;
+
+    const isSameSpot = this.selectedSpotId === spot.id;
     this.selectedSpotId = spot.id;
 
     this.spotMarkers.forEach((marker, id) => {
@@ -202,9 +205,11 @@ export class MapController {
       }
     });
 
-    this.drawRoute(this.userCoords, [spot.lat, spot.lng], spot);
+    if (!isSameSpot || !this.routeLine) {
+      this.drawRoute(this.userCoords, [spot.lat, spot.lng], spot);
+    }
 
-    if (panTo && this.map) {
+    if (panTo && this.map && !isSameSpot) {
       const bounds = L.latLngBounds([this.userCoords, [spot.lat, spot.lng]]);
       this.map.flyToBounds(bounds, {
         paddingTopLeft: [40, 40],
@@ -215,7 +220,7 @@ export class MapController {
       setTimeout(() => this.map.invalidateSize(), 200);
     }
 
-    if (this.onSpotSelect) {
+    if (triggerCallback && this.onSpotSelect) {
       this.onSpotSelect(spot);
     }
   }

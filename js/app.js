@@ -91,6 +91,7 @@ class App {
     }
   }
 
+  bindEvents() {
     // Detail Drawer Pricing Mode Switcher Tabs
     const btnTabAuction = document.getElementById('btnTabAuction');
     const btnTabDecay = document.getElementById('btnTabDecay');
@@ -491,7 +492,7 @@ class App {
               <img src="${spot.host.avatar}" class="host-tiny-avatar" alt="${spot.host.name}" />
               <span class="host-tiny-name">${spot.host.name}</span>
             </div>
-            <button class="card-quick-btn" style="${isAuction ? 'background:var(--solid-amber); color:#ffffff; border:1px solid var(--solid-amber); padding:4px 10px; border-radius:4px; font-weight:800;' : 'background:var(--pastel-sky-bg); color:var(--solid-primary); border:1px solid var(--pastel-sky-border); padding:4px 8px; border-radius:4px; font-weight:700;'}">
+            <button class="card-quick-btn" style="${isAuction ? 'background:var(--pastel-amber-bg); color:var(--solid-amber); border:1.5px solid var(--solid-amber); padding:4px 10px; border-radius:4px; font-weight:800;' : 'background:var(--pastel-sky-bg); color:var(--solid-primary); border:1px solid var(--pastel-sky-border); padding:4px 8px; border-radius:4px; font-weight:700;'}">
               ${isAuction ? `🔨 BID NOW (₹${spot.currentBid})` : 'Reserve →'}
             </button>
           </div>
@@ -526,9 +527,14 @@ class App {
     });
   }
 
-  selectSpot(spot) {
+  selectSpot(spot, notifyMap = true) {
+    if (!spot) return;
     this.selectedSpot = spot;
-    this.mapCtrl.selectSpot(spot);
+
+    if (notifyMap && this.mapCtrl) {
+      this.mapCtrl.selectSpot(spot, true, false);
+    }
+
     this.renderDetailPanel(spot);
 
     document.querySelectorAll('.spot-feed-card').forEach(c => {
@@ -544,7 +550,13 @@ class App {
   }
 
   handleSpotSelected(spot) {
-    this.selectSpot(spot);
+    if (!spot) return;
+    if (this.selectedSpot && this.selectedSpot.id === spot.id) {
+      this.renderDetailPanel(spot);
+      return;
+    }
+    // Spot was picked directly on the map, update UI without re-notifying map
+    this.selectSpot(spot, false);
   }
 
   switchPricingMode(mode) {
@@ -579,7 +591,7 @@ class App {
       if (decayBox) decayBox.style.display = 'none';
       if (btnReserve) btnReserve.style.display = 'none';
 
-      if (!spot.currentBid) spot.currentBid = spot.currentPrice || spot.basePrice;
+      if (!spot.currentBid) spot.currentBid = Math.round(spot.currentPrice || spot.basePrice);
       if (!spot.instantBuyPrice) spot.instantBuyPrice = Math.round(spot.currentBid * 1.5);
       if (!spot.auctionEndsInSeconds) spot.auctionEndsInSeconds = 240;
 
@@ -608,7 +620,7 @@ class App {
       if (decayBox) decayBox.style.display = 'block';
       if (btnReserve) {
         btnReserve.style.display = 'flex';
-        btnReserve.innerHTML = `Reserve with PayPal • <span id="detailBtnPrice">₹${Math.round(spot.currentPrice)}</span>`;
+        btnReserve.innerHTML = `Reserve Now with PayPal • <span id="detailBtnPrice">₹${Math.round(spot.currentPrice)}</span>`;
       }
     }
   }
@@ -641,7 +653,7 @@ class App {
     }
 
     // Default to Bidding view so bidding controls are always immediately visible and testable!
-    const activeView = spot.activePricingView || (spot.pricingType === 'decay' ? 'decay' : 'auction');
+    const activeView = spot.activePricingView || 'auction';
     this.updatePricingModeUI(activeView);
 
     // Update decay specs

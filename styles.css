@@ -1583,3 +1583,31 @@ html, body {
     gap: 14px;
   }
 }
+
+/* Pricing Mode Switcher Tabs */
+.pricing-mode-tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+.pricing-tab-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: var(--radius-xs);
+  font-family: var(--font-family);
+  font-weight: 800;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pricing-tab-btn:hover {
+  filter: brightness(0.97);
+}
+
